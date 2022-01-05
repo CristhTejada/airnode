@@ -48,7 +48,7 @@ describe('submitWithdrawal', () => {
       estimateGasWithdrawalMock.mockResolvedValueOnce(ethers.BigNumber.from(50_000));
       fulfillWithdrawalMock.mockResolvedValueOnce({ hash: '0xsuccessful' });
 
-      const withdrawal = fixtures.requests.buildWithdrawal({ nonce: 5, status: RequestStatus.Pending });
+      const withdrawal = fixtures.requests.buildWithdrawalWithNonce({ nonce: 5, status: RequestStatus.Pending });
       const options = {
         gasTarget,
         masterHDNode,
@@ -88,7 +88,7 @@ describe('submitWithdrawal', () => {
     `does nothing if the request is already fulfilled - %#`,
     async (gasTarget: GasTarget) => {
       const provider = new ethers.providers.JsonRpcProvider();
-      const withdrawal = fixtures.requests.buildWithdrawal({ nonce: 5, status: RequestStatus.Fulfilled });
+      const withdrawal = fixtures.requests.buildWithdrawalWithNonce({ nonce: 5, status: RequestStatus.Fulfilled });
       const [logs, err, data] = await withdrawals.submitWithdrawal(createAirnodeRrpFake(), withdrawal, {
         gasTarget,
         masterHDNode,
@@ -107,52 +107,12 @@ describe('submitWithdrawal', () => {
   );
 
   test.each([gasTarget, gasTargetFallback])(
-    `does nothing if the request is blocked or errored - %#`,
-    async (gasTarget: GasTarget) => {
-      const provider = new ethers.providers.JsonRpcProvider();
-      // NOTE: a withdrawal should not be able to become "errored" or "blocked", but this
-      // is just in case that changes
-      const blocked = fixtures.requests.buildWithdrawal({ status: RequestStatus.Blocked });
-      const errored = fixtures.requests.buildWithdrawal({ status: RequestStatus.Errored });
-
-      const blockedRes = await withdrawals.submitWithdrawal(createAirnodeRrpFake(), blocked, {
-        gasTarget,
-        masterHDNode,
-        provider,
-      });
-      const erroredRes = await withdrawals.submitWithdrawal(createAirnodeRrpFake(), errored, {
-        gasTarget,
-        masterHDNode,
-        provider,
-      });
-
-      expect(blockedRes[0]).toEqual([
-        {
-          level: 'INFO',
-          message: `Withdrawal sponsor address:${blocked.sponsorAddress} for Request:${blocked.id} not actioned as it has status:${blocked.status}`,
-        },
-      ]);
-      expect(blockedRes[1]).toEqual(null);
-      expect(blockedRes[2]).toEqual(null);
-      expect(erroredRes[0]).toEqual([
-        {
-          level: 'INFO',
-          message: `Withdrawal sponsor address:${errored.sponsorAddress} for Request:${errored.id} not actioned as it has status:${errored.status}`,
-        },
-      ]);
-      expect(erroredRes[1]).toEqual(null);
-      expect(erroredRes[2]).toEqual(null);
-      expect(fulfillWithdrawalMock).not.toHaveBeenCalled();
-    }
-  );
-
-  test.each([gasTarget, gasTargetFallback])(
     `does nothing if the withdrawal amount would be negative - %#`,
     async (gasTarget: GasTarget) => {
       const provider = new ethers.providers.JsonRpcProvider();
       getBalanceMock.mockResolvedValueOnce(ethers.BigNumber.from(50_000_000));
       estimateGasWithdrawalMock.mockResolvedValueOnce(ethers.BigNumber.from(50_000));
-      const withdrawal = fixtures.requests.buildWithdrawal({ nonce: 5, status: RequestStatus.Pending });
+      const withdrawal = fixtures.requests.buildWithdrawalWithNonce({ nonce: 5, status: RequestStatus.Pending });
       const options = {
         gasTarget,
         masterHDNode,
@@ -173,35 +133,12 @@ describe('submitWithdrawal', () => {
   );
 
   test.each([gasTarget, gasTargetFallback])(
-    `does nothing if the withdrawal does not have a nonce - %#`,
-    async (gasTarget: GasTarget) => {
-      const provider = new ethers.providers.JsonRpcProvider();
-      const withdrawal = fixtures.requests.buildWithdrawal({ nonce: undefined, status: RequestStatus.Pending });
-      const options = {
-        gasTarget,
-        masterHDNode,
-        provider,
-      };
-      const [logs, err, data] = await withdrawals.submitWithdrawal(createAirnodeRrpFake(), withdrawal, options);
-      expect(logs).toEqual([
-        {
-          level: 'ERROR',
-          message: `Withdrawal sponsor address:${withdrawal.sponsorAddress} for Request:${withdrawal.id} cannot be submitted as it does not have a nonce`,
-        },
-      ]);
-      expect(err).toEqual(null);
-      expect(data).toEqual(null);
-      expect(fulfillWithdrawalMock).not.toHaveBeenCalled();
-    }
-  );
-
-  test.each([gasTarget, gasTargetFallback])(
     `returns an error if the current balance cannot be fetched - %#`,
     async (gasTarget: GasTarget) => {
       const provider = new ethers.providers.JsonRpcProvider();
       getBalanceMock.mockRejectedValueOnce(new Error('Could not fetch balance'));
       getBalanceMock.mockRejectedValueOnce(new Error('Could not fetch balance'));
-      const withdrawal = fixtures.requests.buildWithdrawal({ nonce: 5, status: RequestStatus.Pending });
+      const withdrawal = fixtures.requests.buildWithdrawalWithNonce({ nonce: 5, status: RequestStatus.Pending });
       const options = {
         gasTarget,
         masterHDNode,
@@ -228,7 +165,7 @@ describe('submitWithdrawal', () => {
       getBalanceMock.mockResolvedValueOnce(ethers.BigNumber.from(250_000_000));
       estimateGasWithdrawalMock.mockRejectedValueOnce(new Error('Server did not respond'));
       estimateGasWithdrawalMock.mockRejectedValueOnce(new Error('Server did not respond'));
-      const withdrawal = fixtures.requests.buildWithdrawal({ nonce: 5, status: RequestStatus.Pending });
+      const withdrawal = fixtures.requests.buildWithdrawalWithNonce({ nonce: 5, status: RequestStatus.Pending });
       const options = {
         gasTarget,
         masterHDNode,
@@ -256,7 +193,7 @@ describe('submitWithdrawal', () => {
       estimateGasWithdrawalMock.mockResolvedValueOnce(ethers.BigNumber.from(50_000));
       fulfillWithdrawalMock.mockRejectedValueOnce(new Error('Could not submit withdrawal'));
       fulfillWithdrawalMock.mockRejectedValueOnce(new Error('Could not submit withdrawal'));
-      const withdrawal = fixtures.requests.buildWithdrawal({ nonce: 5, status: RequestStatus.Pending });
+      const withdrawal = fixtures.requests.buildWithdrawalWithNonce({ nonce: 5, status: RequestStatus.Pending });
       const options = {
         gasTarget,
         masterHDNode,

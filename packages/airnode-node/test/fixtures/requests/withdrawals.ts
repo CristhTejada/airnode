@@ -1,5 +1,5 @@
 import { buildMetadata } from './metadata';
-import { Request, RequestStatus, Withdrawal } from '../../../src/types';
+import { Request, RequestStatus, Withdrawal, RequestWithNonce } from '../../../src/types';
 
 export function buildWithdrawal(params?: Partial<Request<Withdrawal>>): Request<Withdrawal> {
   const metadata = buildMetadata();
@@ -15,4 +15,8 @@ export function buildWithdrawal(params?: Partial<Request<Withdrawal>>): Request<
     status: RequestStatus.Pending,
     ...params,
   };
+}
+
+export function buildWithdrawalWithNonce(params?: Partial<RequestWithNonce<Withdrawal>>): RequestWithNonce<Withdrawal> {
+  return { ...buildWithdrawal(params), nonce: -1 };
 }

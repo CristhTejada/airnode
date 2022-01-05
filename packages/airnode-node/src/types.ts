@@ -84,16 +84,19 @@ export interface RequestFulfillment {
   readonly hash: string;
 }
 
-export type Request<T extends {}> = T & {
+export type Request<T> = T & {
   readonly id: string;
   readonly airnodeAddress: string;
   readonly sponsorAddress: string;
   readonly sponsorWalletAddress: string;
+  readonly metadata: RequestMetadata;
+  readonly status: RequestStatus;
   readonly errorMessage?: string;
   readonly fulfillment?: RequestFulfillment;
-  readonly metadata: RequestMetadata;
-  readonly nonce?: number;
-  readonly status: RequestStatus;
+};
+
+export type RequestWithNonce<T> = Request<T> & {
+  readonly nonce: number;
 };
 
 export type ApiCallType = 'template' | 'full';
@@ -136,7 +139,9 @@ export interface GroupedRequests {
 }
 
 export interface SubmitRequest<T> {
-  (airnodeRrp: AirnodeRrp, request: Request<T>, options: TransactionOptions): Promise<LogsErrorData<Request<T>>>;
+  (airnodeRrp: AirnodeRrp, request: RequestWithNonce<T>, options: TransactionOptions): Promise<
+    LogsErrorData<Request<T>>
+  >;
 }
 
 export interface ProviderSettings extends CoordinatorSettings {

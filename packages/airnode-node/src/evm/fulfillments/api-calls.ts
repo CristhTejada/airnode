@@ -13,6 +13,7 @@ import {
   RequestStatus,
   TransactionOptions,
   SubmitRequest,
+  RequestWithNonce,
 } from '../../types';
 import { AirnodeRrp } from '../contracts';
 import { decodeRevertString } from '../utils';
@@ -47,7 +48,7 @@ type StaticResponse = { readonly callSuccess: boolean; readonly callData: string
 // =================================================================
 async function testFulfill(
   airnodeRrp: AirnodeRrp,
-  request: Request<ApiCall>,
+  request: RequestWithNonce<ApiCall>,
   options: TransactionOptions
 ): Promise<LogsErrorData<StaticResponse>> {
   const noticeLog = logger.pend('DEBUG', `Attempting to fulfill API call for Request:${request.id}...`);
@@ -76,7 +77,7 @@ async function testFulfill(
 
 async function submitFulfill(
   airnodeRrp: AirnodeRrp,
-  request: Request<ApiCall>,
+  request: RequestWithNonce<ApiCall>,
   options: TransactionOptions
 ): Promise<LogsErrorData<Request<ApiCall>>> {
   const noticeLog = logger.pend('INFO', `Submitting API call fulfillment for Request:${request.id}...`);
@@ -109,7 +110,7 @@ async function submitFulfill(
 
 async function testAndSubmitFulfill(
   airnodeRrp: AirnodeRrp,
-  request: Request<ApiCall>,
+  request: RequestWithNonce<ApiCall>,
   options: TransactionOptions
 ): Promise<LogsErrorData<Request<ApiCall>>> {
   const errorMessage = requests.getErrorMessage(request);
@@ -121,7 +122,7 @@ async function testAndSubmitFulfill(
   const [testLogs, testErr, testData] = await testFulfill(airnodeRrp, request, options);
 
   if (testErr || (testData && !testData.callSuccess)) {
-    const updatedRequest: Request<ApiCall> = {
+    const updatedRequest: RequestWithNonce<ApiCall> = {
       ...request,
       status: RequestStatus.Errored,
       errorMessage: testErr
@@ -156,7 +157,7 @@ async function testAndSubmitFulfill(
 // =================================================================
 async function submitFail(
   airnodeRrp: AirnodeRrp,
-  request: Request<ApiCall>,
+  request: RequestWithNonce<ApiCall>,
   errorMessage: string,
   options: TransactionOptions
 ): Promise<LogsErrorData<Request<ApiCall>>> {

@@ -12,6 +12,7 @@ import {
   ApiCall,
   Withdrawal,
   SubmitRequest,
+  RequestWithNonce,
 } from '../../types';
 import { AirnodeRrpFactory, AirnodeRrp } from '../contracts';
 import * as verification from '../verification';
@@ -43,7 +44,7 @@ function getTransactionOptions(state: ProviderState<EVMProviderState>) {
 
 function prepareRequestSubmissions<T>(
   state: ProviderState<EVMProviderState>,
-  requests: Request<T>[],
+  requests: RequestWithNonce<T>[],
   type: RequestType,
   submitFunction: SubmitRequest<T>,
   contract: AirnodeRrp
@@ -88,7 +89,7 @@ async function submitSponsorRequestsSequentially(
   // Submit transactions for API calls
   const preparedApiCallSubmissions = prepareRequestSubmissions(
     state,
-    requests.apiCalls,
+    requests.apiCalls as RequestWithNonce<ApiCall>[],
     RequestType.ApiCall,
     submitApiCall,
     contract
@@ -104,7 +105,7 @@ async function submitSponsorRequestsSequentially(
   // Submit transactions for withdrawals
   const preparedWithdrawalSubmissions = prepareRequestSubmissions(
     state,
-    verifiedWithdrawals,
+    verifiedWithdrawals as RequestWithNonce<Withdrawal>[],
     RequestType.Withdrawal,
     submitWithdrawal,
     contract

@@ -1,5 +1,5 @@
 import { buildMetadata } from './metadata';
-import { ApiCall, Request, RequestStatus } from '../../../src/types';
+import { ApiCall, Request, RequestStatus, RequestWithNonce } from '../../../src/types';
 
 export function buildApiCall(params?: Partial<Request<ApiCall>>): Request<ApiCall> {
   const metadata = buildMetadata();
@@ -25,6 +25,10 @@ export function buildApiCall(params?: Partial<Request<ApiCall>>): Request<ApiCal
     type: 'template',
     ...params,
   };
+}
+
+export function buildApiCallWithNonce(params?: Partial<RequestWithNonce<ApiCall>>): RequestWithNonce<ApiCall> {
+  return { ...buildApiCall(params), nonce: -1 };
 }
 
 export function buildSubmittableApiCall(params?: Partial<Request<ApiCall>>): Request<ApiCall> {

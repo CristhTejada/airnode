@@ -38,7 +38,7 @@ describe('submitApiCall', () => {
       `does nothing for API call requests that have already been fulfilled - %#`,
       async (gasTarget: GasTarget) => {
         const provider = new ethers.providers.JsonRpcProvider();
-        const apiCall = fixtures.requests.buildApiCall({ status: RequestStatus.Fulfilled });
+        const apiCall = fixtures.requests.buildApiCallWithNonce({ status: RequestStatus.Fulfilled });
         const [logs, err, data] = await apiCalls.submitApiCall(createAirnodeRrpFake(), apiCall, {
           gasTarget,
           masterHDNode,
@@ -62,7 +62,7 @@ describe('submitApiCall', () => {
   describe('Blocked API calls non-EIP-1559', () => {
     test.each([gasPrice, gasPriceFallback])(`does not action blocked requests - %#`, async (gasTarget: GasTarget) => {
       const provider = new ethers.providers.JsonRpcProvider();
-      const apiCall = fixtures.requests.buildApiCall({ status: RequestStatus.Blocked });
+      const apiCall = fixtures.requests.buildApiCallWithNonce({ status: RequestStatus.Blocked });
       const [logs, err, data] = await apiCalls.submitApiCall(createAirnodeRrpFake(), apiCall, {
         gasTarget,
         masterHDNode,
@@ -84,30 +84,6 @@ describe('submitApiCall', () => {
 
   describe('Pending API calls', () => {
     test.each([gasPrice, gasPriceFallback])(
-      `does nothing for API call requests that do not have a nonce - %#`,
-      async (gasTarget: GasTarget) => {
-        const provider = new ethers.providers.JsonRpcProvider();
-        const apiCall = fixtures.requests.buildApiCall({ nonce: undefined });
-        const [logs, err, data] = await apiCalls.submitApiCall(createAirnodeRrpFake(), apiCall, {
-          gasTarget,
-          masterHDNode,
-          provider,
-        });
-        expect(logs).toEqual([
-          {
-            level: 'ERROR',
-            message: `API call for Request:${apiCall.id} cannot be submitted as it does not have a nonce`,
-          },
-        ]);
-        expect(err).toEqual(null);
-        expect(data).toEqual(null);
-        expect(staticFulfillMock).not.toHaveBeenCalled();
-        expect(fulfillMock).not.toHaveBeenCalled();
-        expect(failMock).not.toHaveBeenCalled();
-      }
-    );
-
-    test.each([gasPrice, gasPriceFallback])(
       `successfully tests and submits a fulfill transaction for pending requests - %#`,
       async (gasTarget: GasTarget) => {
         const txOpts = { gasLimit: 500_000, ...gasTarget, nonce: 5 };
@@ -115,7 +91,7 @@ describe('submitApiCall', () => {
         staticFulfillMock.mockResolvedValueOnce({ callSuccess: true, callData: '0x' });
         fulfillMock.mockResolvedValueOnce({ hash: '0xtransactionId' });
 
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           id: '0xb56b66dc089eab3dc98672ea5e852488730a8f76621fd9ea719504ea205980f8',
           responseValue: '0x448b8ad3a330cf8f269f487881b59efff721b3dfa8e61f7c8fd2480389459ed3',
           signature:
@@ -170,7 +146,7 @@ describe('submitApiCall', () => {
         (fulfillMock as any).mockRejectedValueOnce(new Error('Server did not respond'));
         (fulfillMock as any).mockRejectedValueOnce(new Error('Server did not respond'));
 
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           id: '0xb56b66dc089eab3dc98672ea5e852488730a8f76621fd9ea719504ea205980f8',
           responseValue: '0x448b8ad3a330cf8f269f487881b59efff721b3dfa8e61f7c8fd2480389459ed3',
           signature:
@@ -225,7 +201,7 @@ describe('submitApiCall', () => {
         const provider = new ethers.providers.JsonRpcProvider();
         staticFulfillMock.mockResolvedValueOnce({ callSuccess: false, callData: '0x' });
         (failMock as jest.Mock).mockResolvedValueOnce({ hash: '0xfailtransaction' });
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           id: '0xb56b66dc089eab3dc98672ea5e852488730a8f76621fd9ea719504ea205980f8',
           responseValue: '0x448b8ad3a330cf8f269f487881b59efff721b3dfa8e61f7c8fd2480389459ed3',
           signature:
@@ -282,7 +258,7 @@ describe('submitApiCall', () => {
             '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000e416c776179732072657665727473000000000000000000000000000000000000',
         });
         (failMock as jest.Mock).mockResolvedValueOnce({ hash: '0xfailtransaction' });
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           id: '0xb56b66dc089eab3dc98672ea5e852488730a8f76621fd9ea719504ea205980f8',
           responseValue: '0x448b8ad3a330cf8f269f487881b59efff721b3dfa8e61f7c8fd2480389459ed3',
           signature:
@@ -334,7 +310,7 @@ describe('submitApiCall', () => {
         const txOpts = { gasLimit: 500_000, ...gasTarget, nonce: 5 };
         const provider = new ethers.providers.JsonRpcProvider();
         staticFulfillMock.mockResolvedValueOnce(null);
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           id: '0xb56b66dc089eab3dc98672ea5e852488730a8f76621fd9ea719504ea205980f8',
           responseValue: '0x448b8ad3a330cf8f269f487881b59efff721b3dfa8e61f7c8fd2480389459ed3',
           signature:
@@ -379,7 +355,7 @@ describe('submitApiCall', () => {
         staticFulfillMock.mockRejectedValueOnce(new Error('Server did not respond'));
         (failMock as any).mockRejectedValueOnce(new Error('Server still says no'));
         (failMock as any).mockRejectedValueOnce(new Error('Server still says no'));
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           id: '0xb56b66dc089eab3dc98672ea5e852488730a8f76621fd9ea719504ea205980f8',
           responseValue: '0x448b8ad3a330cf8f269f487881b59efff721b3dfa8e61f7c8fd2480389459ed3',
           signature:
@@ -440,7 +416,7 @@ describe('submitApiCall', () => {
         const txOpts = { gasLimit: 500_000, ...gasTarget, nonce: 5 };
         const provider = new ethers.providers.JsonRpcProvider();
         failMock.mockResolvedValueOnce({ hash: '0xfailtransaction' });
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           errorMessage: RequestErrorMessage.ApiCallFailed,
           status: RequestStatus.Errored,
           nonce: 5,
@@ -485,7 +461,7 @@ describe('submitApiCall', () => {
         failMock.mockRejectedValueOnce(new Error('Server did not respond'));
         // We need to do this twice because promise-utils will retry
         failMock.mockRejectedValueOnce(new Error('Server did not respond'));
-        const apiCall = fixtures.requests.buildApiCall({
+        const apiCall = fixtures.requests.buildApiCallWithNonce({
           id: '0xb56b66dc089eab3dc98672ea5e852488730a8f76621fd9ea719504ea205980f8',
           errorMessage: `${RequestErrorMessage.ApiCallFailed} with error: Server did not respond`,
           status: RequestStatus.Errored,
