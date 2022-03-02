@@ -126,8 +126,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14.17.1'
-      # - name: Start background services
-      #   run: yarn run dev:background
+      - name: Start background services
+        run: yarn run dev:eth-node
       - run: yarn run test:e2e-${{ matrix.package }}
       - name: Slack Notification
         uses: lazy-actions/slatify@master
