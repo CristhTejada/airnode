@@ -115,13 +115,13 @@ jobs:
     needs: build
     strategy:
       matrix:
-        package: [examples]
+        package: [admin, node, examples]
     steps:
-      # - uses: actions/cache@v2
-      #   id: restore-build
-      #   with:
-      #     path: ./*
-      #     key: ${{ github.sha }}
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-2
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
