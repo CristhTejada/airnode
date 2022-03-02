@@ -38,9 +38,9 @@ const getEip1559GasPricing = async (options: FetchOptions): Promise<LogsData<Gas
     return [logs, null];
   }
 
-  // const maxPriorityFeePerGas = chainOptions.priorityFee
-  //   ? parsePriorityFee(chainOptions.priorityFee)
-  //   : BigNumber.from(PRIORITY_FEE);
+  const maxPriorityFeePerGas = chainOptions.priorityFee
+    ? parsePriorityFee(chainOptions.priorityFee)
+    : BigNumber.from(PRIORITY_FEE);
   const baseFeeMultiplier = chainOptions.baseFeeMultiplier ? chainOptions.baseFeeMultiplier : BASE_FEE_MULTIPLIER;
   const maxFeePerGas = blockHeader.baseFeePerGas
     .mul(BigNumber.from(baseFeeMultiplier))
@@ -49,7 +49,7 @@ const getEip1559GasPricing = async (options: FetchOptions): Promise<LogsData<Gas
   return [
     logs,
     {
-      maxPriorityFeePerGas: BigNumber.from(PRIORITY_FEE),
+      maxPriorityFeePerGas,
       maxFeePerGas,
     },
   ];
