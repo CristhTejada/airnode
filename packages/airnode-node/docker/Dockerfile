@@ -5,17 +5,21 @@ ENV appDir="/app" \
     cronjob="/etc/cron.d/${name}"
 
 LABEL application=${name} \
-      description="Airnode Client"
+    description="Airnode Client"
 
 WORKDIR ${appDir}
 
 COPY --from=api3/airnode-artifacts /dependencies/common ${appDir}/node_modules
+RUN true
 COPY --from=api3/airnode-artifacts /dependencies/airnode-node ${appDir}/node_modules
+RUN true
 COPY --from=api3/airnode-artifacts /packages ${appDir}/node_modules/@api3/
+RUN true
 COPY --from=api3/airnode-artifacts /build/packages/airnode-node/dist ${appDir}/
+RUN true
 COPY packages/airnode-node/docker/airnode-crontab ${cronjob}
 
-    # Install Tini to pass signals correctly
+# Install Tini to pass signals correctly
 RUN apk add --update --no-cache tini && \
     # Create Airnode user
     adduser -h ${appDir} -s /bin/false -S -D -H ${name} && \
