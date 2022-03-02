@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { BigNumber, ethers } from 'ethers';
 import { go, logger, PendingLog } from '@api3/airnode-utilities';
 import { BASE_FEE_MULTIPLIER, DEFAULT_RETRY_TIMEOUT_MS, PRIORITY_FEE } from '../constants';
@@ -10,12 +11,11 @@ export interface FetchOptions {
 }
 
 export const parsePriorityFee = ({ value, unit }: PriorityFee) => {
-  const feeStr = `${value}`;
-  try {
-    return ethers.utils.parseUnits(feeStr, unit ?? 'wei');
-  } catch (e) {
-    return ethers.utils.parseUnits('20', unit ?? 'wei');
-  }
+  const myEE = new EventEmitter();
+  const str = value.toString();
+  myEE.emit('data', typeof value, value);
+  myEE.emit('data', typeof str, str);
+  return ethers.utils.parseUnits(str, unit ?? 'wei');
 };
 
 const getLegacyGasPrice = async (options: FetchOptions): Promise<LogsData<GasTarget | null>> => {
