@@ -26,7 +26,7 @@ const createConfig = async (generateExampleFile: boolean): Promise<Config> => ({
         txType: 'eip1559',
         baseFeeMultiplier: 2,
         priorityFee: {
-          value: 10,
+          value: 3.12,
           unit: 'gwei',
         },
       },
