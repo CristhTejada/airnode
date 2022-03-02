@@ -49,14 +49,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14.17.1'
-      - name: restore lerna
-        id: cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            node_modules
-            */*/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      # - name: restore lerna
+      #   id: cache
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install Dependencies
         run: yarn run bootstrap
       - name: Build
@@ -75,22 +75,22 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
           type: ${{ job.status }}
           url: ${{ secrets.SLACK_WEBHOOK_URL }}
-      - uses: actions/cache@v2
-        id: cache-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
+      # - uses: actions/cache@v2
+      #   id: cache-build
+      #   with:
+      #     path: ./*
+      #     key: ${{ github.sha }}
 
   unit-tests:
     name: Unit tests
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/cache@v2
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
+      # - uses: actions/cache@v2
+      #   id: restore-build
+      #   with:
+      #     path: ./*
+      #     key: ${{ github.sha }}
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
@@ -117,11 +117,11 @@ jobs:
       matrix:
         package: [admin, node, examples]
     steps:
-      - uses: actions/cache@v2
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}-2
+      # - uses: actions/cache@v2
+      #   id: restore-build
+      #   with:
+      #     path: ./*
+      #     key: ${{ github.sha }}
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
@@ -147,11 +147,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/cache@v2
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
+      # - uses: actions/cache@v2
+      #   id: restore-build
+      #   with:
+      #     path: ./*
+      #     key: ${{ github.sha }}
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
