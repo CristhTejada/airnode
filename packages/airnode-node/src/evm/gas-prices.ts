@@ -9,8 +9,14 @@ export interface FetchOptions {
   readonly chainOptions: ChainOptions;
 }
 
-export const parsePriorityFee = ({ value, unit }: PriorityFee) =>
-  ethers.utils.parseUnits(value.toString(), unit ?? 'wei');
+export const parsePriorityFee = ({ value, unit }: PriorityFee) => {
+  const feeStr = `${value}`;
+  try {
+    return ethers.utils.parseUnits(feeStr, unit ?? 'wei');
+  } catch (e) {
+    return ethers.utils.parseUnits('20', unit ?? 'wei');
+  }
+};
 
 const getLegacyGasPrice = async (options: FetchOptions): Promise<LogsData<GasTarget | null>> => {
   const { provider } = options;
