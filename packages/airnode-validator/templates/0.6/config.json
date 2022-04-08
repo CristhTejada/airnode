@@ -49,6 +49,45 @@
         ]
       }
     },
+    "httpSignedData": {
+      "__arrayItem": {
+        "endpointId": {
+          "__regexp": "^0x[a-fA-F0-9]{64}$"
+        },
+        "oisTitle": {
+          "__type": "string"
+        },
+        "endpointName": {
+          "__type": "string"
+        },
+        "__conditions": [
+          {
+            "__if": {
+              "oisTitle": ".*"
+            },
+            "__rootThen": {
+              "ois": {
+                "__any": {
+                  "title": {
+                    "__regexp": "^__match$"
+                  },
+                  "endpoints": {
+                    "__any": {
+                      "name": {
+                        "__regexp": "[['endpointName']]"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "__catch": {
+              "__message": "OIS \"[['oisTitle']]\" must contain endpoint \"'[['endpointName']]\", as it is specified in {{0}}.{{1}}.{{2}}.{{3}}"
+            }
+          }
+        ]
+      }
+    },
     "__optional": {
       "http": {
         "__arrayItem": {
@@ -133,6 +172,12 @@
             }
           }
         ],
+        "fulfillmentGasLimit": {
+          "__type": "number",
+          "__catch": {
+            "__message": "__fullPath: This field must be an integer"
+          }
+        },
         "__optional": {
           "baseFeeMultiplier": {
             "__type": "number",
@@ -184,10 +229,10 @@
   },
   "nodeSettings": {
     "nodeVersion": {
-      "__regexp": "^0\\.4\\.[0-9]+$",
+      "__regexp": "^0\\.6\\.[0-9]+$",
       "__catch": {
         "__level": "error",
-        "__message": "__fullPath: nodeVersion should be set to 0.4.*"
+        "__message": "__fullPath: nodeVersion should be set to 0.6.*"
       }
     },
     "cloudProvider": {
@@ -211,6 +256,17 @@
         },
         {
           "__if": {
+            "type": "^(aws|gcp)$"
+          },
+          "__then": {
+            "disableConcurrencyReservations": {}
+          },
+          "__catch": {
+            "__message": "Missing parameter nodeSettings.cloudProvider.disableConcurrencyReservations"
+          }
+        },
+        {
+          "__if": {
             "type": "^gcp$"
           },
           "__then": {
@@ -228,6 +284,51 @@
             {
               "__if": {
                 "__this": ".*"
+              },
+              "__rootThen": {
+                "nodeSettings": {
+                  "cloudProvider": {
+                    "type": {
+                      "__regexp": "^(aws|gcp)$",
+                      "__catch": {
+                        "__level": "error"
+                      }
+                    }
+                  }
+                }
+              },
+              "__catch": {
+                "__message": "Extra field: __fullPath"
+              }
+            }
+          ]
+        },
+        "disableConcurrencyReservations": {
+          "__type": "boolean",
+          "__conditions": [
+            {
+              "__if": {
+                "__this": false
+              },
+              "__rootThen": {
+                "nodeSettings": {
+                  "cloudProvider": {
+                    "type": {
+                      "__regexp": "^(aws|gcp)$",
+                      "__catch": {
+                        "__level": "error"
+                      }
+                    }
+                  }
+                }
+              },
+              "__catch": {
+                "__message": "Extra field: __fullPath"
+              }
+            },
+            {
+              "__if": {
+                "__this": true
               },
               "__rootThen": {
                 "nodeSettings": {
@@ -348,6 +449,44 @@
           "__regexp": "^.{30,60}$",
           "__catch": {
             "__message": "__fullPath: The key must have a length of between 30 - 120 characters."
+          }
+        },
+        "maxConcurrency": {
+          "__type": "number",
+          "__catch": {
+            "__message": "__fullPath: This field must be an integer"
+          }
+        }
+      }
+    },
+    "httpSignedDataGateway": {
+      "enabled": {
+        "__type": "boolean"
+      },
+      "__conditions": [
+        {
+          "__if": {
+            "enabled": true
+          },
+          "__then": {
+            "apiKey": {}
+          },
+          "__catch": {
+            "__message": "{{0}}.{{1}}: If httpSignedDataGateway is enabled parameter apiKey is required"
+          }
+        }
+      ],
+      "__optional": {
+        "apiKey": {
+          "__regexp": "^.{30,60}$",
+          "__catch": {
+            "__message": "__fullPath: The key must have a length of between 30 - 120 characters."
+          }
+        },
+        "maxConcurrency": {
+          "__type": "number",
+          "__catch": {
+            "__message": "__fullPath: This field must be an integer"
           }
         }
       }
