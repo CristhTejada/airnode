@@ -82,6 +82,9 @@ async function executeApiCalls(state: CoordinatorState) {
   const logOptions = buildBaseOptions(config, { coordinatorId });
 
   const aggregatedApiCalls = Object.values(aggregatedApiCallsById);
+
+  logger.info('API CALLS: ' + JSON.stringify(aggregatedApiCalls));
+
   const [logs, processedAggregatedApiCalls] = await calls.callApis(
     aggregatedApiCalls,
     logOptions,
