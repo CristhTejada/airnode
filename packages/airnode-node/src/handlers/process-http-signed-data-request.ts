@@ -55,6 +55,8 @@ export async function processHttpSignedDataRequest(
     },
   };
 
+  logger.info('API CALL: ' + JSON.stringify(aggregatedApiCall));
+
   const [logs, response] = await callApi({ config, aggregatedApiCall });
 
   logger.logPending(logs, logOptions);
